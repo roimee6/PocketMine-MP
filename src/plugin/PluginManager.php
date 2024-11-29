@@ -69,10 +69,16 @@ use function strtolower;
  * Manages all the plugins
  */
 class PluginManager{
-	/** @var Plugin[] */
+	/**
+	 * @var Plugin[]
+	 * @phpstan-var array<string, Plugin>
+	 */
 	protected array $plugins = [];
 
-	/** @var Plugin[] */
+	/**
+	 * @var Plugin[]
+	 * @phpstan-var array<string, Plugin>
+	 */
 	protected array $enabledPlugins = [];
 
 	/** @var array<string, array<string, true>> */
@@ -114,6 +120,7 @@ class PluginManager{
 
 	/**
 	 * @return Plugin[]
+	 * @phpstan-return array<string, Plugin>
 	 */
 	public function getPlugins() : array{
 		return $this->plugins;
@@ -510,9 +517,12 @@ class PluginManager{
 
 			unset($this->enabledPlugins[$plugin->getDescription()->getName()]);
 			foreach(Utils::stringifyKeys($this->pluginDependents) as $dependency => $dependentList){
-				unset($this->pluginDependents[$dependency][$plugin->getDescription()->getName()]);
-				if(count($this->pluginDependents[$dependency]) === 0){
-					unset($this->pluginDependents[$dependency]);
+				if(isset($this->pluginDependents[$dependency][$plugin->getDescription()->getName()])){
+					if(count($this->pluginDependents[$dependency]) === 1){
+						unset($this->pluginDependents[$dependency]);
+					}else{
+						unset($this->pluginDependents[$dependency][$plugin->getDescription()->getName()]);
+					}
 				}
 			}
 
@@ -523,7 +533,7 @@ class PluginManager{
 	}
 
 	public function tickSchedulers(int $currentTick) : void{
-		foreach($this->enabledPlugins as $pluginName => $p){
+		foreach(Utils::promoteKeys($this->enabledPlugins) as $pluginName => $p){
 			if(isset($this->enabledPlugins[$pluginName])){
 				//the plugin may have been disabled as a result of updating other plugins' schedulers, and therefore
 				//removed from enabledPlugins; however, foreach will still see it due to copy-on-write
@@ -646,6 +656,11 @@ class PluginManager{
 		}
 
 		$handlerName = Utils::getNiceClosureName($handler);
+
+		$reflect = new \ReflectionFunction($handler);
+		if($reflect->isGenerator()){
+			throw new PluginException("Generator function $handlerName cannot be used as an event handler");
+		}
 
 		if(!$plugin->isEnabled()){
 			throw new PluginException("Plugin attempted to register event handler " . $handlerName . "() to event " . $event . " while not enabled");
