@@ -37,6 +37,7 @@ use function str_starts_with;
 
 abstract class Timings{
 	public const GROUP_MINECRAFT = "Minecraft";
+	/** @deprecated No longer used */
 	public const GROUP_BREAKDOWN = "Minecraft - Breakdown";
 
 	private static bool $initialized = false;
@@ -351,6 +352,9 @@ abstract class Timings{
 		return self::$asyncTaskCompletion[$taskClass];
 	}
 
+	/**
+	 * @deprecated No longer used
+	 */
 	public static function getAsyncTaskErrorTimings(AsyncTask $task, string $group = self::GROUP_MINECRAFT) : TimingsHandler{
 		$taskClass = $task::class;
 		if(!isset(self::$asyncTaskError[$taskClass])){
