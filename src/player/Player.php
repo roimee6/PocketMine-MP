@@ -1471,6 +1471,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer{
 		return true;
 	}
 
+	public function canEat() : bool{
+		return $this->isCreative() || parent::canEat();
+	}
+
 	public function canBreathe() : bool{
 		return $this->isCreative() || parent::canBreathe();
 	}
