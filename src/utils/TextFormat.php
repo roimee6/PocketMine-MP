@@ -204,6 +204,20 @@ abstract class TextFormat{
 	}
 
 	/**
+	 * Converts any Java formatting codes in the given string to Bedrock.
+	 *
+	 * As of 1.21.50, strikethrough (§m) and underline (§n) are not supported by Bedrock, and these symbols are instead
+	 * used to represent additional colours in Bedrock. To avoid unintended formatting, this function currently strips
+	 * those formatting codes to prevent unintended colour display in formatted text.
+	 *
+	 * If Bedrock starts to support these formats in the future, this function will be updated to translate them rather
+	 * than removing them.
+	 */
+	public static function javaToBedrock(string $string) : string{
+		return str_replace([TextFormat::ESCAPE . "m", TextFormat::ESCAPE . "n"], "", $string);
+	}
+
+	/**
 	 * Returns an HTML-formatted string with colors/markup
 	 */
 	public static function toHTML(string $string) : string{
